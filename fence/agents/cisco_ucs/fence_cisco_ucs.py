@@ -7,6 +7,7 @@ import atexit
 sys.path.append("@FENCEAGENTSLIBDIR@")
 from fencing import *
 from fencing import fail, EC_STATUS, EC_LOGIN_DENIED, run_delay
+import fencing_pycurl
 
 RE_COOKIE = re.compile("<aaaLogin .* outCookie=\"(.*?)\"", re.IGNORECASE)
 RE_STATUS = re.compile("<lsPower .*? state=\"(.*?)\"", re.IGNORECASE)
@@ -107,7 +108,7 @@ def send_command(opt, command, timeout):
 	url += "//" + opt["--ip"] + ":" + str(opt["--ipport"]) + "/nuova"
 
 	## send command through pycurl
-	conn = pycurl.Curl()
+	conn = fencing_pycurl.FencingPyCurl()
 	web_buffer = io.BytesIO()
 	conn.setopt(pycurl.URL, url.encode("ascii"))
 	conn.setopt(pycurl.HTTPHEADER, ["Content-type: text/xml"])
