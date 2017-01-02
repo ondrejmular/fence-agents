@@ -26,6 +26,12 @@ class ProxyServer(mitmproxy.ProxyServer):
         reactor.connectSSL(
             self.host, self.port, factory, ssl.ClientContextFactory())
 
+    def _terminate(self):
+        print "requests left: %s" % self.requests_left
+        if self.requests_left == 0:
+            print "terminating..."
+            mitmproxy.ProxyServer._terminate(self)
+
 
 def main():
     '''
@@ -38,22 +44,46 @@ def main():
         print "Please do create server certificates (see readme)."
         sys.exit(1)
 
-    log = mitmproxy.Logger()
-    if opts.logfile is not None:
-        log.open_log(opts.logfile)
+    # log = mitmproxy.Logger()
+    # if opts.logfile is not None:
+    #     log.open_log(opts.logfile)
+    log_list = []
+    if opts.requests > 1:
+        for i in range(opts.requests):
+            log = mitmproxy.Logger()
+            if opts.logfile is not None:
+                log.open_log("{0}.part{1}".format(opts.logfile, i))
+            log_list.append(log)
+    else:
+        log = mitmproxy.Logger()
+        if opts.logfile is not None:
+            log.open_log(opts.logfile)
+        log_list.append(log)
+
 
     sys.stderr.write(
         'Server running on localhost:%d...\n' % opts.localport)
 
-    factory = mitmproxy.ProxyServerFactory(
-        ProxyServer, opts.host, opts.port, log)
+    factory = mitmproxy.MultiLogProxyServerFactory(
+        ProxyServer, opts.host, opts.port, log_list)
     reactor.listenSSL(
         opts.localport, factory, ssl.DefaultOpenSSLContextFactory(
             os.path.expanduser('~/.mitmkeys/server.key'),
             os.path.expanduser('~/.mitmkeys/server.crt')))
-    reactor.run()
-    sys.exit(mitmproxy.exit_code.pop())
 
+    # for log in log_list:
+    #     print log
+    #     factory = mitmproxy.ProxyServerFactory(
+    #         ProxyServer, opts.host, opts.port, log, 1)
+    #     reactor.listenSSL(
+    #         opts.localport, factory, ssl.DefaultOpenSSLContextFactory(
+    #             os.path.expanduser('~/.mitmkeys/server.key'),
+    #             os.path.expanduser('~/.mitmkeys/server.crt')))
+
+    reactor.run()
+    ret_code = mitmproxy.exit_code.pop()
+    if ret_code != 0:
+        sys.exit(ret_code)
 
 if __name__ == '__main__':
     try:

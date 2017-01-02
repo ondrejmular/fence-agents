@@ -31,6 +31,8 @@ global exit_code
 exit_code = list()
 exit_code.append(0)
 
+request = 0
+
 def terminate():
     '''
     Shutdown the twisted reactor.
@@ -72,6 +74,10 @@ def proxy_option_parser(port, localport):
         '-o', '--output', dest='logfile', type='string',
         metavar='FILE', default=None,
         help='Save log to FILE instead of writing to stdout')
+    parser.add_option(
+        '-r', '--requests', dest='requests', type='int',
+        metavar='REQUESTS', default=1,
+        help='Requests (default: %default)')
     opts, args = parser.parse_args()
     return (opts, args)
 
@@ -373,7 +379,7 @@ class ProxyProtocol(protocol.Protocol):
     '''
     def __init__(self):
         # all needed attributes are defined dynamically
-        pass
+        self.requests_left = 0
 
     def proxy_data_received(self, data):
         '''
@@ -423,6 +429,9 @@ class ProxyProtocol(protocol.Protocol):
         # put a special value into tx queue to indicate connecion loss
         self.transmit.put(False)
         # stop the program
+        self._terminate()
+
+    def _terminate(self):
         terminate()
 
 class UDPProxyServer(protocol.DatagramProtocol):
@@ -555,16 +564,19 @@ class ProxyClient(ProxyProtocol):
         # callback for the receiver queue
         self.receive.get().addCallback(self.proxy_data_received)
 
+    def _terminate(self):
+        pass
+
 
 class ProxyClientFactory(protocol.ClientFactory):
     '''
     Factory for proxy clients
     '''
     protocol = ProxyClient
+    origin = "server"
 
     def __init__(self, serverq, clientq, log):
         # which side we're talking to?
-        self.origin = 'server'
         self.serverq = serverq
         self.clientq = clientq
         self.log = log
@@ -611,13 +623,50 @@ class ProxyServerFactory(protocol.ServerFactory):
     '''
     def __init__(self, proto, host, port, log):
         self.protocol = proto
+        self.host = host
+        self.port = port
+        self.log = log
+
+    def buildProtocol(self, addr):
+        obj = self.protocol()
         # which side we're talking to?
-        self.protocol.origin = "client"
-        self.protocol.host = host
-        self.protocol.port = port
-        self.protocol.log = log
-        self.protocol.receive = defer.DeferredQueue()
-        self.protocol.transmit = defer.DeferredQueue()
+        obj.origin = "client"
+        obj.host = self.host
+        obj.port = self.port
+        obj.log = self.log
+        obj.requests_left = 0
+        obj.receive = defer.DeferredQueue()
+        obj.transmit = defer.DeferredQueue()
+        return obj
+
+
+class MultiLogProxyServerFactory(protocol.ServerFactory):
+    '''
+    Factory for proxy servers
+    '''
+    def __init__(self, proto, host, port, log_list):
+        self.protocol = proto
+        self.host = host
+        self.port = port
+        self.log_list = log_list
+
+    def buildProtocol(self, addr):
+        if len(self.log_list) <= 0:
+            sys.stderr.write(
+                "Unexpected connection (number of expected connections: {0})"
+                .format(self.requests)
+            )
+            sys.exit(1)
+        obj = self.protocol()
+        # which side we're talking to?
+        obj.origin = "client"
+        obj.host = self.host
+        obj.port = self.port
+        obj.log = self.log_list.pop(0)
+        obj.requests_left = len(self.log_list)
+        obj.receive = defer.DeferredQueue()
+        obj.transmit = defer.DeferredQueue()
+        return obj
 
 
 class ReplayServer(protocol.Protocol):
