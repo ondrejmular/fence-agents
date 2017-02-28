@@ -33,7 +33,7 @@ def main():
 
     log = mitmproxy.Logger()
     if opts.logfile is not None:
-        log.open_log(opts.logfile)
+        log.open_log(opts.logfile, 'w')
 
     sys.stderr.write(
         'Server running on localhost:%d...\n' % (opts.localport))

@@ -7,11 +7,20 @@ See --help for usage.
 from twisted.internet import reactor, ssl
 import sys
 import os
+from OpenSSL import SSL
 import mitmproxy
 
 # disable reporting of bogus "no-member" errors
 # pylint: disable=E1101
 
+
+class SslClientContextFactory(object):
+    _context_factory = SSL.Context
+
+    def getContext(self):
+        context = self._context_factory(SSL.TLSv1_METHOD)
+        context.set_verify(SSL.VERIFY_NONE, lambda *args: True)
+        return context
 
 class ProxyServer(mitmproxy.ProxyServer):
     '''
@@ -24,7 +33,7 @@ class ProxyServer(mitmproxy.ProxyServer):
         factory = mitmproxy.ProxyClientFactory(
             self.transmit, self.receive, self.log)
         reactor.connectSSL(
-            self.host, self.port, factory, ssl.ClientContextFactory())
+            self.host, self.port, factory, SslClientContextFactory())
 
 
 def main():
@@ -38,9 +47,22 @@ def main():
         print "Please do create server certificates (see readme)."
         sys.exit(1)
 
-    log = mitmproxy.Logger()
-    if opts.logfile is not None:
-        log.open_log(opts.logfile)
+    # log = mitmproxy.Logger()
+    # if opts.logfile is not None:
+    #     log.open_log(opts.logfile, 'w')
+    log_list = []
+    if opts.requests > 1:
+        for i in range(opts.requests):
+            log = mitmproxy.Logger()
+            if opts.logfile is not None:
+                log.open_log("{0}.part{1}".format(opts.logfile, i), 'w')
+            log_list.append(log)
+    else:
+        log = mitmproxy.Logger()
+        if opts.logfile is not None:
+            log.open_log(opts.logfile, 'w')
+        log_list.append(log)
+
 
     sys.stderr.write(
         'Server running on localhost:%d...\n' % opts.localport)

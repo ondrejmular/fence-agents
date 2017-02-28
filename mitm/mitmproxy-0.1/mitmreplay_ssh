@@ -25,6 +25,8 @@ def main():
     if opts.inputfile is None:
         sys.stderr.write('Need to specify an input file.\n')
         sys.exit(1)
+    
+    opts.mode = 'r'
 
     sys.stderr.write(
         'Server running on localhost:%d\n' % opts.localport)

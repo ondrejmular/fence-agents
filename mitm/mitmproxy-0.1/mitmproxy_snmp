@@ -15,7 +15,7 @@ def got_ip(ipaddr, opts):
     # set logger
     log = mitmproxy.Logger()
     if opts.logfile is not None:
-        log.open_log(opts.logfile)
+        log.open_log(opts.logfile, 'w')
 
     server = mitmproxy.UDPProxyServer(log, ipaddr, opts.port)
     reactor.listenUDP(opts.localport, server)

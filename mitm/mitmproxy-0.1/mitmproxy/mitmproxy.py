@@ -139,6 +139,10 @@ def replay_option_parser(localport):
         metavar='FILE', default=None,
         help='Read session capture from FILE instead of STDIN')
     parser.add_option(
+        '-r', '--requests', dest='requests', type='int',
+        metavar='REQUESTS', default=1,
+        help='Requests (default: %default)')
+    parser.add_option(
         '-o', '--output', dest='logfile', type='string',
         metavar='FILE', default=None,
         help='Log into FILE instead of STDOUT')
@@ -328,12 +332,12 @@ class Logger(object):
         self.starttime = None
         self.logfile = None
 
-    def open_log(self, filename):
+    def open_log(self, filename, mode):
         '''
         Set up a file for writing a log into it.
         If not called, log is written to STDOUT.
         '''
-        self.logfile = open(filename, 'w')
+        self.logfile = open(filename, mode)
 
     def close_log(self):
         '''
@@ -706,6 +710,9 @@ class ReplayServer(protocol.Protocol):
             sys.stderr.write('FAIL! Premature end: not all messages sent.\n')
         sys.stderr.write('Client disconnected.\n')
         self.log.close_log()
+        self._terminate()
+
+    def _terminate(self):
         terminate()
 
 
@@ -833,12 +840,53 @@ class ReplayServerFactory(protocol.ServerFactory):
     protocol = ReplayServer
 
     def __init__(self, log, (serverq, clientq), delaymod, clientfirst):
-        self.protocol.log = log
-        self.protocol.serverq = serverq
-        self.protocol.clientq = clientq
-        self.protocol.delaymod = delaymod
-        self.protocol.clientfirst = clientfirst
-        self.protocol.success = False
+        self.log = log
+        self.serverq = serverq
+        self.clientq = clientq
+        self.delaymod = delaymod
+        self.clientfirst = clientfirst
+
+    def buildProtocol(self, addr):
+        obj = self.protocol()
+        obj.log = self.log
+        obj.requests_left = 0
+        obj.serverq = self.serverq
+        obj.clientq = self.clientq
+        obj.delaymod = self.delaymod
+        obj.clientfirst = self.clientfirst
+        obj.success = False
+        return obj
+
+
+class MultiLogReplayServerFactory(protocol.ServerFactory):
+    '''
+    Factory for replay servers
+    '''
+    protocol = ReplayServer
+
+    def __init__(self, proto, log_list, (serverq, clientq), delaymod, clientfirst):
+        self.protocol = proto
+        self.log_list = log_list
+        self.serverq = serverq
+        self.clientq = clientq
+        self.delaymod = delaymod
+        self.clientfirst = clientfirst
+
+    def buildProtocol(self, addr):
+        if len(self.log_list) <= 0:
+            sys.stderr.write(
+                "Unexpected connection (number of expected connections: {0})"
+                .format(self.requests)
+            )
+        obj = self.protocol()
+        obj.log = self.log_list.pop(0)
+        obj.requests_left = len(self.log_list)
+        obj.serverq = self.serverq
+        obj.clientq = self.clientq
+        obj.delaymod = self.delaymod
+        obj.clientfirst = self.clientfirst
+        obj.success = False
+        return obj
 
 
 def logreader(inputfile, serverq=Queue.Queue(), clientq=Queue.Queue(),
@@ -954,10 +1002,10 @@ class SSHFactory(factory.SSHFactory):
         }
         self.portal = portal.Portal(Realm())
 
-        # Defaut attributes.
+        # Default attributes.
         self.log = Logger()
         if opts.logfile is not None:
-            self.log.open_log(opts.logfile)
+            self.log.open_log(opts.logfile, opts.mode)
         self.spub = opts.serverpubkey
         self.spriv = opts.serverprivkey
         self.sshdebug = sshdebug.SSHDebug(opts.showpassword)

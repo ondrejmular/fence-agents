@@ -8,7 +8,19 @@ from twisted.internet import reactor, ssl
 import Queue
 import sys
 import os
+from OpenSSL import SSL
 import mitmproxy
+
+
+class ReplayServer(mitmproxy.ReplayServer):
+    '''
+    ReplayServer with implemented connect procedure
+    '''
+    def _terminate(self):
+        print "requests left: %s" % self.requests_left
+        if self.requests_left == 0:
+            print "terminating..."
+            mitmproxy.ReplayServer._terminate(self)
 
 
 def main():
@@ -26,9 +38,21 @@ def main():
         print "Need to specify an input file."
         sys.exit(1)
     else:
-        log = mitmproxy.Logger()
-        if opts.logfile is not None:
-            log.open_log(opts.logfile)
+        #log = mitmproxy.Logger()
+        #if opts.inputfile is not None:
+        #    log.open_log(opts.inputfile, 'r')
+        log_list = []
+        if opts.requests > 1:
+            for i in range(opts.requests):
+                log = mitmproxy.Logger()
+                if opts.inputfile is not None:
+                    log.open_log("{0}.part{1}".format(opts.inputfile, i), 'r')
+                log_list.append(log)
+        else:
+            log = mitmproxy.Logger()
+            if opts.inputfile is not None:
+                log.open_log(opts.inputfile, 'r')
+            log_list.append(log)
 
         serverq = Queue.Queue()
         clientq = Queue.Queue()
@@ -38,8 +62,8 @@ def main():
 
         sys.stderr.write(
             'Server running on localhost:%d\n' % opts.localport)
-        factory = mitmproxy.ReplayServerFactory(
-            log, (serverq, clientq), opts.delaymod, clientfirst)
+        factory = mitmproxy.MultiLogReplayServerFactory(
+            ReplayServer, log_list, (serverq, clientq), opts.delaymod, clientfirst)
         reactor.listenSSL(opts.localport, factory,
             ssl.DefaultOpenSSLContextFactory(
                 os.path.expanduser('~/.mitmkeys/server.key'),
