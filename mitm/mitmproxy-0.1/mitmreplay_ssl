@@ -5,22 +5,39 @@ See --help for usage.
 '''
 
 from twisted.internet import reactor, ssl
-import Queue
 import sys
 import os
-from OpenSSL import SSL
 import mitmproxy
 
 
-class ReplayServer(mitmproxy.ReplayServer):
-    '''
-    ReplayServer with implemented connect procedure
-    '''
-    def _terminate(self):
-        print "requests left: %s" % self.requests_left
-        if self.requests_left == 0:
-            print "terminating..."
-            mitmproxy.ReplayServer._terminate(self)
+def get_input_file_list(input_file):
+    input_file_list = []
+    if os.path.isfile(input_file):
+        input_file_list.append(input_file)
+    else:
+        dir_name = os.path.dirname(os.path.abspath(input_file))
+        basename = os.path.basename(input_file)
+        file_list = [
+            entity
+            for entity in os.listdir(dir_name)
+            if (
+                entity.startswith(basename)
+                and
+                os.path.isfile(os.path.join(dir_name, entity))
+            )
+        ]
+        counter = 0
+        while True:
+            file_name = "{0}.part{1}".format(basename, counter)
+            if file_name not in file_list:
+                break
+            counter += 1
+            input_file_list.append(os.path.join(dir_name, file_name))
+
+        if not input_file_list:
+            print "Input file '{0}' not found.".format(input_file)
+            sys.exit(1)
+    return input_file_list
 
 
 def main():
@@ -38,32 +55,15 @@ def main():
         print "Need to specify an input file."
         sys.exit(1)
     else:
-        #log = mitmproxy.Logger()
-        #if opts.inputfile is not None:
-        #    log.open_log(opts.inputfile, 'r')
-        log_list = []
-        if opts.requests > 1:
-            for i in range(opts.requests):
-                log = mitmproxy.Logger()
-                if opts.inputfile is not None:
-                    log.open_log("{0}.part{1}".format(opts.inputfile, i), 'r')
-                log_list.append(log)
-        else:
-            log = mitmproxy.Logger()
-            if opts.inputfile is not None:
-                log.open_log(opts.inputfile, 'r')
-            log_list.append(log)
+        log = mitmproxy.Logger()
+        if opts.inputfile is not None:
+           log.open_log(opts.inputfile, 'r')
 
-        serverq = Queue.Queue()
-        clientq = Queue.Queue()
-        clientfirst = None
-
-        mitmproxy.logreader(opts.inputfile, serverq, clientq, clientfirst)
-
+        input_file_list = get_input_file_list(opts.inputfile)
         sys.stderr.write(
             'Server running on localhost:%d\n' % opts.localport)
         factory = mitmproxy.MultiLogReplayServerFactory(
-            ReplayServer, log_list, (serverq, clientq), opts.delaymod, clientfirst)
+            log, input_file_list, opts.delaymod)
         reactor.listenSSL(opts.localport, factory,
             ssl.DefaultOpenSSLContextFactory(
                 os.path.expanduser('~/.mitmkeys/server.key'),

@@ -864,28 +864,27 @@ class MultiLogReplayServerFactory(protocol.ServerFactory):
     '''
     protocol = ReplayServer
 
-    def __init__(self, proto, log_list, (serverq, clientq), delaymod, clientfirst):
-        self.protocol = proto
-        self.log_list = log_list
-        self.serverq = serverq
-        self.clientq = clientq
+    def __init__(self, log, input_list, delaymod):
+        self.log = log
+        self.input_list = input_list
+        self.requests = len(input_list)
         self.delaymod = delaymod
-        self.clientfirst = clientfirst
 
     def buildProtocol(self, addr):
-        if len(self.log_list) <= 0:
+        if not self.input_list:
             sys.stderr.write(
                 "Unexpected connection (number of expected connections: {0})"
                 .format(self.requests)
             )
+            sys.exit(1)
         obj = self.protocol()
-        obj.log = self.log_list.pop(0)
-        obj.requests_left = len(self.log_list)
-        obj.serverq = self.serverq
-        obj.clientq = self.clientq
+        obj.log = self.log
         obj.delaymod = self.delaymod
-        obj.clientfirst = self.clientfirst
         obj.success = False
+        obj.serverq, obj.clientq, obj.clientfirst = logreader(
+            self.input_list.pop(0)
+        )
+        obj.requests_left = len(self.input_list)
         return obj
 
 
