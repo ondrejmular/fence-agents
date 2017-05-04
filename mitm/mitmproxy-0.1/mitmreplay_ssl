@@ -56,8 +56,8 @@ def main():
         sys.exit(1)
     else:
         log = mitmproxy.Logger()
-        if opts.inputfile is not None:
-           log.open_log(opts.inputfile, 'r')
+        #if opts.inputfile is not None:
+        #   log.open_log(opts.inputfile, 'r')
 
         input_file_list = get_input_file_list(opts.inputfile)
         sys.stderr.write(

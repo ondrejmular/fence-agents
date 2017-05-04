@@ -79,7 +79,7 @@ class RecordTestData(object):
 		)
 		logging.debug("Log file: {log}".format(log=self.log))
 
-		if os.path.isfile(self.log) and not force:
+		if os.path.isfile(self.log):
 			if force:
 				os.remove(self.log)
 			else:
