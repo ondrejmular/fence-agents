@@ -263,7 +263,7 @@ class FenceAgentTestCase(ParametrizedTestCase):
 	def get_test_identificator(self, short=False):
 		if short:
 			if not self.short_test_identificator:
-				self.short_test_identificator = "{0} => {0}".format(
+				self.short_test_identificator = "{0} => {1}".format(
 					ftl.get_basename(self.device_cfg),
 					ftl.get_basename(self.action_cfg)
 				)
