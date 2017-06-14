@@ -26,8 +26,6 @@ def main():
         sys.exit(1)
     else:
         log = mitmproxy.Logger()
-        if opts.inputfile is not None:
-            log.open_log(opts.inputfile, 'r')
 
         (serverq, clientq, clientfirst) = mitmproxy.logreader(opts.inputfile)
 
