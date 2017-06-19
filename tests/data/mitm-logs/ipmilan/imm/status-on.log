@@ -1,0 +1,33 @@
+[
+    {
+        "request": {
+            "env": {}, 
+            "argv": [
+                "/usr/bin/ipmitool", 
+                "-I", 
+                "lanplus", 
+                "-H", 
+                "localhost", 
+                "-U", 
+                "test", 
+                "-P", 
+                "test", 
+                "-p", 
+                "623", 
+                "-L", 
+                "ADMINISTRATOR", 
+                "chassis", 
+                "power", 
+                "status"
+            ]
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": "Chassis Power is on\n"
+        }, 
+        "time": {
+            "perform_duration": 1.6401541233062744
+        }
+    }
+]

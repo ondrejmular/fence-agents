@@ -1,0 +1,95 @@
+[
+    {
+        "request": {
+            "env": {}, 
+            "argv": [
+                "/usr/bin/ipmitool", 
+                "-I", 
+                "lanplus", 
+                "-H", 
+                "localhost", 
+                "-U", 
+                "test", 
+                "-P", 
+                "test", 
+                "-p", 
+                "623", 
+                "-L", 
+                "ADMINISTRATOR", 
+                "chassis", 
+                "power", 
+                "status"
+            ]
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": "Chassis Power is on\n"
+        }, 
+        "time": {
+            "perform_duration": 1.6292469501495361
+        }
+    }, 
+    {
+        "request": {
+            "argv": [
+                "/usr/bin/ipmitool", 
+                "-I", 
+                "lanplus", 
+                "-H", 
+                "localhost", 
+                "-U", 
+                "test", 
+                "-P", 
+                "test", 
+                "-p", 
+                "623", 
+                "-L", 
+                "ADMINISTRATOR", 
+                "chassis", 
+                "power", 
+                "off"
+            ], 
+            "env": {}
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": "Chassis Power Control: Down/Off\n"
+        }, 
+        "time": {
+            "perform_duration": 1.5384559631347656
+        }
+    }, 
+    {
+        "request": {
+            "env": {}, 
+            "argv": [
+                "/usr/bin/ipmitool", 
+                "-I", 
+                "lanplus", 
+                "-H", 
+                "localhost", 
+                "-U", 
+                "test", 
+                "-P", 
+                "test", 
+                "-p", 
+                "623", 
+                "-L", 
+                "ADMINISTRATOR", 
+                "chassis", 
+                "power", 
+                "status"
+            ]
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": "Chassis Power is off\n"
+        }, 
+        "time": {
+            "perform_duration": 1.6067039966583252
+        }
+    }
+]

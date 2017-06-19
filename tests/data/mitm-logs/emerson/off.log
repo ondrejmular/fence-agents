@@ -1,0 +1,79 @@
+[
+    {
+        "request": {
+            "env": {}, 
+            "argv": [
+                "/usr/bin/snmpget", 
+                "-m", 
+                "", 
+                "-Oeqn", 
+                "-v", 
+                "2c", 
+                "-c", 
+                "fencetest", 
+                "localhost:161", 
+                ".1.3.6.1.4.1.476.1.42.3.8.50.20.1.95.1.1.1"
+            ]
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": ".1.3.6.1.4.1.476.1.42.3.8.50.20.1.95.1.1.1 2\n"
+        }, 
+        "time": {
+            "perform_duration": 0.11022806167602539
+        }
+    }, 
+    {
+        "request": {
+            "argv": [
+                "/usr/bin/snmpset", 
+                "-m", 
+                "", 
+                "-Oeqn", 
+                "-v", 
+                "2c", 
+                "-c", 
+                "fencetest", 
+                "localhost:161", 
+                ".1.3.6.1.4.1.476.1.42.3.8.50.20.1.100.1.1.1", 
+                "i", 
+                "0"
+            ], 
+            "env": {}
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": ".1.3.6.1.4.1.476.1.42.3.8.50.20.1.100.1.1.1 0\n"
+        }, 
+        "time": {
+            "perform_duration": 0.2281630039215088
+        }
+    }, 
+    {
+        "request": {
+            "env": {}, 
+            "argv": [
+                "/usr/bin/snmpget", 
+                "-m", 
+                "", 
+                "-Oeqn", 
+                "-v", 
+                "2c", 
+                "-c", 
+                "fencetest", 
+                "localhost:161", 
+                ".1.3.6.1.4.1.476.1.42.3.8.50.20.1.95.1.1.1"
+            ]
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": ".1.3.6.1.4.1.476.1.42.3.8.50.20.1.95.1.1.1 1\n"
+        }, 
+        "time": {
+            "perform_duration": 0.10874509811401367
+        }
+    }
+]

@@ -1,0 +1,157 @@
+[
+    {
+        "request": {
+            "env": {}, 
+            "argv": [
+                "/usr/bin/ipmitool", 
+                "-I", 
+                "lanplus", 
+                "-H", 
+                "localhost", 
+                "-U", 
+                "test", 
+                "-P", 
+                "test", 
+                "-p", 
+                "623", 
+                "-L", 
+                "ADMINISTRATOR", 
+                "chassis", 
+                "power", 
+                "status"
+            ]
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": "Chassis Power is on\n"
+        }, 
+        "time": {
+            "perform_duration": 1.5558629035949707
+        }
+    }, 
+    {
+        "request": {
+            "argv": [
+                "/usr/bin/ipmitool", 
+                "-I", 
+                "lanplus", 
+                "-H", 
+                "localhost", 
+                "-U", 
+                "test", 
+                "-P", 
+                "test", 
+                "-p", 
+                "623", 
+                "-L", 
+                "ADMINISTRATOR", 
+                "chassis", 
+                "power", 
+                "off"
+            ], 
+            "env": {}
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": "Chassis Power Control: Down/Off\n"
+        }, 
+        "time": {
+            "perform_duration": 1.5457069873809814
+        }
+    }, 
+    {
+        "request": {
+            "env": {}, 
+            "argv": [
+                "/usr/bin/ipmitool", 
+                "-I", 
+                "lanplus", 
+                "-H", 
+                "localhost", 
+                "-U", 
+                "test", 
+                "-P", 
+                "test", 
+                "-p", 
+                "623", 
+                "-L", 
+                "ADMINISTRATOR", 
+                "chassis", 
+                "power", 
+                "status"
+            ]
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": "Chassis Power is off\n"
+        }, 
+        "time": {
+            "perform_duration": 1.508741855621338
+        }
+    }, 
+    {
+        "request": {
+            "argv": [
+                "/usr/bin/ipmitool", 
+                "-I", 
+                "lanplus", 
+                "-H", 
+                "localhost", 
+                "-U", 
+                "test", 
+                "-P", 
+                "test", 
+                "-p", 
+                "623", 
+                "-L", 
+                "ADMINISTRATOR", 
+                "chassis", 
+                "power", 
+                "on"
+            ], 
+            "env": {}
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": "Chassis Power Control: Up/On\n"
+        }, 
+        "time": {
+            "perform_duration": 1.465730905532837
+        }
+    }, 
+    {
+        "request": {
+            "env": {}, 
+            "argv": [
+                "/usr/bin/ipmitool", 
+                "-I", 
+                "lanplus", 
+                "-H", 
+                "localhost", 
+                "-U", 
+                "test", 
+                "-P", 
+                "test", 
+                "-p", 
+                "623", 
+                "-L", 
+                "ADMINISTRATOR", 
+                "chassis", 
+                "power", 
+                "status"
+            ]
+        }, 
+        "response": {
+            "return_code": 0, 
+            "stderr": "", 
+            "stdout": "Chassis Power is on\n"
+        }, 
+        "time": {
+            "perform_duration": 1.5023939609527588
+        }
+    }
+]
