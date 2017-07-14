@@ -86,6 +86,15 @@ class RecordTestData(object):
 				raise RecordException(
 					"Log file already exists. Use --force to overwrite it."
 				)
+		elif not os.path.exists(os.path.dirname(self.log)):
+			try:
+				os.makedirs(os.path.dirname(self.log))
+			except OSError as e:
+				raise RecordException(
+					"Unable to create directory '{0}': {1}".format(
+						os.path.dirname(self.log), str(e)
+					)
+				)
 
 		self.mitm_process = None
 		self.params = ""
