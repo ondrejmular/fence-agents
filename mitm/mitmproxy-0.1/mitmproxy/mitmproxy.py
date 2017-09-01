@@ -840,22 +840,14 @@ class ReplayServerFactory(protocol.ServerFactory):
     protocol = ReplayServer
 
     def __init__(self, log, (serverq, clientq), delaymod, clientfirst):
-        self.log = log
-        self.serverq = serverq
-        self.clientq = clientq
-        self.delaymod = delaymod
-        self.clientfirst = clientfirst
-
-    def buildProtocol(self, addr):
-        obj = self.protocol()
-        obj.log = self.log
-        obj.requests_left = 0
-        obj.serverq = self.serverq
-        obj.clientq = self.clientq
-        obj.delaymod = self.delaymod
-        obj.clientfirst = self.clientfirst
-        obj.success = False
-        return obj
+        print "replay server factory init"
+        print str(serverq)
+        self.protocol.log = log
+        self.protocol.serverq = serverq
+        self.protocol.clientq = clientq
+        self.protocol.delaymod = delaymod
+        self.protocol.clientfirst = clientfirst
+        self.protocol.success = False
 
 
 class MultiLogReplayServerFactory(protocol.ServerFactory):
@@ -1097,9 +1089,10 @@ class ReplaySSHServerFactory(SSHFactory):
 
         # Create our service ReplayAvatar for portal.
         (serverq, clientq, clientfirst) = logreader(opts.inputfile)
+        ReplayServerFactory.protocol = SSHReplayServerProtocol
         replay_factory = ReplayServerFactory(self.log, (serverq, clientq),
                 opts.delaymod, clientfirst)
-        replay_factory.protocol = SSHReplayServerProtocol
+        # replay_factory.protocol = SSHReplayServerProtocol
         self.avatar = ReplayAvatar(replay_factory.protocol())
 
         # Override default protal and credentials checker.
