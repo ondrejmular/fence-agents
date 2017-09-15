@@ -22,7 +22,7 @@ FENCING_LIB_PATH = "../fence/agents/lib"  # path to fencing libs
 DEVICES_PATH = "./devices.d"  # path to device directory
 ACTIONS_PATH = "./actions.d"  # path to actions directory
 MITM_LOGS_PATH = "./data/mitm-logs"  # path to mitm logs
-MITM_PROXY_PATH = "../mitm/mitmproxy-0.1/build"  # path to mitm_proxy servers
+MITM_PROXY_PATH = "../mitmproxy/build"  # path to mitm_proxy servers
 BINMITM_COUNTERFILE = "./.counterfile"  # path to counter file for BINMITM
 MITMPROXY_STARTUP_TIMEOUT = 1
 
